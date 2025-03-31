@@ -1,0 +1,26 @@
+#Cautions : Dont forget to add default request
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: python-app
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: app-limit-range
+  namespace: python-app
+spec:
+  limits:
+    - type: Container
+      max: #The maximum limit that we are assigning to the container in python-app namespace
+        cpu: "1"
+        memory: "512Mi"
+      min: #The minimum limit that we are assigning to the container in python-app namespace
+        cpu: "100m"
+        memory: "128Mi"
+      default: #The default limit that we are assigning to the container in python-app namespace
+        cpu: "500m"
+        memory: "256Mi"
+      defaultRequest: #The request limit that we are assigning to the container in python-app namespace
+        cpu: "100m"
+        memory: "128Mi"
