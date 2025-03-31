@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Assignment 2</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 100px;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            display: inline-block;
+        }
+        .visit-count {
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: #3498db;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Assignment 2 of Sai Santhosh Pothapragada</h1>
+        <p>This application is deployed using Jenkins, ArgoCD, and Kubernetes</p>
+        <p>Metrics and logs are available for Prometheus and Grafana</p>
+        <div class="visit-count">
+            Total Visits: {{ visit_count }}
+        </div>
+    </div>
+</body>
+</html>
