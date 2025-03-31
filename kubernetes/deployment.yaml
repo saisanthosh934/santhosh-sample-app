@@ -20,7 +20,8 @@ spec:
     spec:
       containers:
       - name: python-app
-        image: your-docker-repo/python-app:latest
+        image:  saisanthosh934/sample-app:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 5000
         volumeMounts:

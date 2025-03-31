@@ -1,4 +1,4 @@
-from flask import Flask, render_template, Response
+from flask import Flask, render_template, Response, jsonify
 import prometheus_metrics
 import logging
 import os
@@ -42,4 +42,35 @@ def home():
     prometheus_metrics.page_views.labels(page='home').inc()
     return render_template('index.html', visit_count=visit_count)
 
-# ... rest of the code remains the same ...
+
+@app.route('/health')
+def health():
+    logger.info("Health check endpoint accessed")
+    prometheus_metrics.health_checks.inc()
+    # try:
+    #     # Verify we can write to the data directory
+    #     test_file = os.path.join(DATA_DIR, 'healthcheck.tmp')
+    #     with open(test_file, 'w') as f:
+    #         f.write('healthcheck')
+    #     os.remove(test_file)
+    #     return jsonify({'status': 'healthy'}), 200
+    # except Exception as e:
+    #     logger.error(f"Health check failed: {str(e)}")
+    #     return jsonify({'status': 'unhealthy', 'error': str(e)}), 500
+    return {
+        'status': 'healthy',
+        'visit_count': get_visit_count()
+    }, 200
+
+
+@app.route('/metrics')
+def metrics():
+    prometheus_metrics.metrics_requests.inc()
+    return Response(
+        generate_latest(),
+        mimetype=CONTENT_TYPE_LATEST
+    )
+
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
