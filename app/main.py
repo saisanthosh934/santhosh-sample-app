@@ -47,16 +47,6 @@ def home():
 def health():
     logger.info("Health check endpoint accessed")
     prometheus_metrics.health_checks.inc()
-    # try:
-    #     # Verify we can write to the data directory
-    #     test_file = os.path.join(DATA_DIR, 'healthcheck.tmp')
-    #     with open(test_file, 'w') as f:
-    #         f.write('healthcheck')
-    #     os.remove(test_file)
-    #     return jsonify({'status': 'healthy'}), 200
-    # except Exception as e:
-    #     logger.error(f"Health check failed: {str(e)}")
-    #     return jsonify({'status': 'unhealthy', 'error': str(e)}), 500
     return {
         'status': 'healthy',
         'visit_count': get_visit_count()
