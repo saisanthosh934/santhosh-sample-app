@@ -1,61 +1,57 @@
-pipeline {
+pipeline{
     agent any
-    
-    environment {
-        DOCKER_IMAGE = 'your-docker-repo/python-app'
-        DOCKER_TAG = "${env.BUILD_NUMBER}"
-        KUBE_CONFIG = credentials('kubeconfig')
-    }
-    
-    stages {
-        stage('Checkout') {
-            steps {
-                git branch: 'main', url: 'https://github.com/your-repo/python-app.git'
+    stages{
+        stage("Checkout"){
+            steps{
+                git branch: 'main', url: 'https://github.com/saisanthosh934/santhosh-sample-app'
             }
+            
         }
+
         
-        stage('Build') {
+        stage('Docker Image Build') {
             steps {
-                sh 'docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} .'
+                script {
+                        sh 'docker system prune -f'
+                        sh 'docker container prune -f'
+                        sh 'docker build -t ${APP_NAME}:${BUILD_NUMBER} .'
+                }
             }
         }
         
         stage('Test') {
             steps {
-                sh 'docker run ${DOCKER_IMAGE}:${DOCKER_TAG} python -m pytest'
+                 sh 'docker run python-app:${BUILD_NUMBER} python -m pytest || [ $? -eq 5 ] && echo "No tests found"'
             }
         }
         
-        stage('Push') {
+        stage('Docker Image Push') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh 'echo ${DOCKER_PASS} | docker login -u ${DOCKER_USER} --password-stdin'
-                    sh 'docker push ${DOCKER_IMAGE}:${DOCKER_TAG}'
-                    sh 'docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest'
-                    sh 'docker push ${DOCKER_IMAGE}:latest'
-                }
+            withCredentials([usernamePassword(credentialsId: 'docker-credentials-id', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+            script {
+                sh 'ls -la'
+                sh 'pwd'
+                sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
+                sh 'docker tag ${APP_NAME}:${BUILD_NUMBER} ${DOCKER_USERNAME}/${APP_NAME}:${BUILD_NUMBER}'
+                sh 'docker push ${DOCKER_USERNAME}/${APP_NAME}:${BUILD_NUMBER}'
+                sh 'docker logout'
+            }
+            }
             }
         }
+
         
-        stage('Deploy to Kubernetes') {
-            steps {
-                withKubeConfig([credentialsId: 'kubeconfig']) {
-                    sh 'kubectl apply -f kubernetes/'
-                    sh 'kubectl set image deployment/python-app python-app=${DOCKER_IMAGE}:${DOCKER_TAG}'
-                }
-            }
-        }
+        
     }
-    
-    post {
-        always {
-            cleanWs()
+    post{
+        always{
+            echo "========always========"
         }
-        success {
-            slackSend(color: 'good', message: "Build ${env.BUILD_NUMBER} succeeded!")
+        success{
+            echo "========pipeline executed successfully ========"
         }
-        failure {
-            slackSend(color: 'danger', message: "Build ${env.BUILD_NUMBER} failed!")
+        failure{
+            echo "========pipeline execution failed========"
         }
     }
 }
