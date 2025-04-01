@@ -1,7 +1,6 @@
-import time
 from prometheus_client import Counter, Histogram, Gauge
 
-# Metrics definitions
+# Existing metrics
 page_views = Counter(
     'page_views_total',
     'Total number of page views',
@@ -18,20 +17,52 @@ metrics_requests = Counter(
     'Total number of metrics requests'
 )
 
-request_latency = Histogram(
-    'http_request_latency_seconds',
-    'HTTP request latency in seconds',
-    ['endpoint']
+# New metrics
+database_queries = Counter(
+    'database_queries_total',
+    'Total number of database queries',
+    ['query_type']
 )
 
-app_uptime = Gauge(
-    'app_uptime_seconds',
-    'Application uptime in seconds'
+external_api_calls = Counter(
+    'external_api_calls_total',
+    'Total number of external API calls',
+    ['api_name', 'status']
 )
 
-# Update uptime metric
-start_time = time.time()
+response_sizes = Histogram(
+    'response_size_bytes',
+    'Size of HTTP responses',
+    ['endpoint'],
+    buckets=[100, 1000, 10000, 100000, 1000000]
+)
 
+cache_hits = Counter(
+    'cache_hits_total',
+    'Total number of cache hits',
+    ['cache_name']
+)
 
-def update_uptime():
-    app_uptime.set(time.time() - start_time)
+cache_misses = Counter(
+    'cache_misses_total',
+    'Total number of cache misses',
+    ['cache_name']
+)
+
+# Business specific metrics
+orders_processed = Counter(
+    'orders_processed_total',
+    'Total number of orders processed',
+    ['status']
+)
+
+revenue_generated = Counter(
+    'revenue_generated_total',
+    'Total revenue generated',
+    ['currency']
+)
+
+active_users = Gauge(
+    'active_users_count',
+    'Current number of active users'
+)
