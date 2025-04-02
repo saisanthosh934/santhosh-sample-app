@@ -14,19 +14,25 @@ pipeline {
             }
         }
 
+
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('sonar-server') { // Must match Jenkins config name
-                    sh """
-                    /opt/sonar-scanner/bin/sonar-scanner \
-                    -Dsonar.projectKey=python-app \
-                    -Dsonar.sources=. \
-                    -Dsonar.login=sqa_7b3841a344d476298f3bdcf38709582b915b5e6a \
-                    -Dsonar.host.url=http://13.232.255.206:9000/
-                    """
+
+                withCredentials([usernamePassword(credentialsId: 'sonar-creds', usernameVariable: 'SONAR_HOST_URL', passwordVariable: 'SONAR_LOGIN_TOKEN')]) {
+                    withSonarQubeEnv('sonar-server') { 
+                        sh """
+                        /opt/sonar-scanner/bin/sonar-scanner \
+                        -Dsonar.projectKey=python-app \
+                        -Dsonar.sources=. \
+                        -Dsonar.login=${SONAR_LOGIN_TOKEN} \
+                        -Dsonar.host.url=${SONAR_HOST_URL}
+                        """
+                    }
                 }
             }
         }
+
+
 
         stage('Docker Image Build') {
             steps {
@@ -94,7 +100,7 @@ pipeline {
                         curl -X POST \
                         -H "Authorization: Bearer ${ARGOCD_TOKEN}" \
                         -H "Content-Type: application/json" \
-                        https://argocd.example.com/api/v1/applications/my-app/sync \
+                        https://argocd.example.com/api/v1/applications/python-app/sync \
                         -d '{}'
                         """
                     }
